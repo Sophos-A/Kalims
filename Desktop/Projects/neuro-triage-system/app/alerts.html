@@ -1,0 +1,22 @@
+<div class="alerts-container">
+    {% for alert in recent_alerts %}
+    <div class="alert-item priority-{{ alert.priority|lower }}">
+        <div class="alert-header">
+            <span class="alert-id">Alert #{{ alert.id }}</span>
+            <span class="alert-time">{{ alert.timestamp }}</span>
+            <span class="alert-priority">{{ alert.priority }}</span>
+        </div>
+        <div class="alert-content">
+            <strong>Case {{ alert.case_id }}:</strong> {{ alert.message }}
+        </div>
+        <div class="alert-actions">
+            <button class="acknowledge-btn" data-alert-id="{{ alert.id }}">Acknowledge</button>
+            <button class="details-btn">View Details</button>
+        </div>
+    </div>
+    {% else %}
+    <div class="no-alerts">
+        <p>No critical alerts at this time</p>
+    </div>
+    {% endfor %}
+</div>

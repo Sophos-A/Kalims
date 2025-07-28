@@ -1,0 +1,24 @@
+<div class="table-container">
+    <table class="cases-table">
+        <thead>
+            <tr>
+                <th>Case ID</th>
+                <th>Severity</th>
+                <th>Symptoms</th>
+                <th>Arrival Time</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody id="cases-table-body">
+            {% for case in active_cases %}
+            <tr class="case-row severity-{{ case.severity|lower }}">
+                <td>{{ case.id }}</td>
+                <td><span class="severity-badge">{{ case.severity }}</span></td>
+                <td>{{ case.symptoms }}</td>
+                <td>{{ case.arrival_time }}</td>
+                <td>{{ case.duration }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

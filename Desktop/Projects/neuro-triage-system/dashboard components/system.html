@@ -1,0 +1,25 @@
+<div class="system-metrics">
+    <div class="metric">
+        <div class="metric-label">AI Response Time</div>
+        <div class="metric-value">{{ system_status.response_time }}s</div>
+        <div class="metric-gauge">
+            <div class="gauge-fill" style="width: {{ system_status.response_time * 50 }}%"></div>
+        </div>
+    </div>
+    
+    <div class="metric">
+        <div class="metric-label">System Load</div>
+        <div class="metric-value">42%</div>
+        <div class="metric-gauge">
+            <div class="gauge-fill" style="width: 42%"></div>
+        </div>
+    </div>
+    
+    <div class="metric">
+        <div class="metric-label">Memory Usage</div>
+        <div class="metric-value">1.2GB/4GB</div>
+        <div class="metric-gauge">
+            <div class="gauge-fill" style="width: 30%"></div>
+        </div>
+    </div>
+</div>

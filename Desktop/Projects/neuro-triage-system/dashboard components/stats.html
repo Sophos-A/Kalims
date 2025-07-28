@@ -1,0 +1,18 @@
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.total_cases }}</div>
+        <div class="stat-label">Total Cases</div>
+    </div>
+    <div class="stat-card critical-stat">
+        <div class="stat-value">{{ stats.critical_cases }}</div>
+        <div class="stat-label">Critical Cases</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.avg_response_time }}s</div>
+        <div class="stat-label">Avg. Response Time</div>
+    </div>
+</div>
+
+<div class="chart-container">
+    <canvas id="cases-by-hour-chart"></canvas>
+</div>
