@@ -1,7 +1,8 @@
 // src/app.js
 const express = require('express');
 const cors = require('cors');
-const { sequelize } = require('./config/database');
+const { sequelize } = require('./src/config/db');
+const Patient = require('./src/models/Patient');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 const socketio = require('./websockets/socket');
@@ -20,8 +21,8 @@ app.use(express.json());
 
 // Database connection
 sequelize.sync()
-  .then(() => console.log('Database connected'))
-  .catch(err => console.error('Database connection error:', err));
+  .then(() => console.log('Tables synced'))
+  .catch(err => console.error('Sync Error:', err));
 
 // Routes
 app.use('/api/patients', patientRoutes);
