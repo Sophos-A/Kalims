@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal - KBTH Triage System</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 400px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+        }
+
+        .patient-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .patient-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .patient-button.returning {
+            background: white;
+            color: var(--primary-dark);
+            border: 2px solid var(--primary);
+        }
+
+        .patient-button.returning:hover {
+            background: #f8f8f8;
+        }
+
+        .back-home {
+            display: block;
+            text-align: center;
+            margin-top: 3rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-home:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="korle-bu-686x700-removebg-preview.png" alt="KBTH Logo" class="hospital-logo">
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="welcome-message">
+            <h2>Welcome to Korle Bu Teaching Hospital</h2>
+            <p class="tagline">Patient Portal</p>
+        </div>
+        
+        <div class="button-container">
+            <a href="patient_register.html" class="patient-button">
+                New Patient Registration
+            </a>
+            <a href="login.html" class="patient-button returning">
+                Existing Patient Sign In
+            </a>
+            <a href="entry.html" class="back-home">← Back to Home</a>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check/Record Patient Status - Korle Bu Teaching Hospital</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="api-config.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #004d00;
+            color: white;
+            text-align: center;
+            padding: 1em;
+        }
+        nav {
+            background-color: #333;
+            padding: 1em;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            margin: 0 1em;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav a:hover {
+            color: #ddd;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2em auto;
+            padding: 1em;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+            table-layout: fixed; /* Ensure consistent column widths */
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 0.5em;
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            max-width: 100%; /* Prevent overflow */
+            padding: 0.5em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            box-sizing: border-box; /* Include padding and border in width */
+        }
+        td.remarks-cell {
+            max-width: 200px; /* Constrain remarks column width */
+            overflow: hidden;
+        }
+        button {
+            background-color: #004d00;
+            color: white;
+            padding: 0.5em 1em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #003300;
+        }
+        input[type="checkbox"] {
+            cursor: pointer;
+        }
+        td.checkbox-cell {
+            text-align: center;
+            width: 80px; /* Fixed width for checkbox column */
+        }
+        td.action-cell {
+            width: 100px; /* Fixed width for action column */
+            text-align: center; /* Center the save button */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Korle Bu Teaching Hospital</h1>
+    </header>
+    <nav>
+        <a href="entry.html">Home</a>
+        <a href="staff.html">Staff Portal</a>
+        <a href="view_triage.html">View Triage Queue</a>
+    </nav>
+    <div class="container">
+        <h2>Check/Record Patient Status</h2>
+        <table id="status-table">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Age</th>
+                    <th>Symptoms</th>
+                    <th>Seen by Doctor</th>
+                    <th>Doctor Remarks</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="status-body">
+                <!-- Patient data will be populated here -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        // Function to render the patient status table
+        function renderStatusTable() {
+            // Get patients from localStorage or initialize with empty array
+            let patients = JSON.parse(localStorage.getItem("patients")) || [];
+            const tbody = document.getElementById("status-body");
+            tbody.innerHTML = "";
+            patients.forEach((patient, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${patient.name}</td>
+                    <td>${patient.age}</td>
+                    <td>${patient.symptoms}</td>
+                    <td class="checkbox-cell">
+                        <input type="checkbox" ${patient.seenByDoctor ? "checked" : ""} onclick="toggleSeen(${index})">
+                    </td>
+                    <td class="remarks-cell">
+                        <textarea rows="2" onchange="updateRemarks(${index}, this.value)">${patient.remarks || ""}</textarea>
+                    </td>
+                    <td class="action-cell">
+                        <button onclick="saveStatus(${index})">Save</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Function to toggle seen by doctor status
+        function toggleSeen(index) {
+            let patients = JSON.parse(localStorage.getItem("patients")) || [];
+            patients[index].seenByDoctor = !patients[index].seenByDoctor;
+            localStorage.setItem("patients", JSON.stringify(patients));
+            renderStatusTable();
+        }
+
+        // Function to update doctor remarks
+        function updateRemarks(index, remarks) {
+            let patients = JSON.parse(localStorage.getItem("patients")) || [];
+            patients[index].remarks = remarks;
+            localStorage.setItem("patients", JSON.stringify(patients));
+        }
+
+        // Function to save status (optional confirmation)
+        function saveStatus(index) {
+            let patients = JSON.parse(localStorage.getItem("patients")) || [];
+            localStorage.setItem("patients", JSON.stringify(patients));
+            alert("Status saved for " + patients[index].name);
+        }
+
+        // Initial render
+        renderStatusTable();
+    </script>
+</body>
+</html>

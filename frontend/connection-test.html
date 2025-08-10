@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KALIMS - Connection Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+    .status {
+      padding: 10px;
+      border-radius: 4px;
+      margin: 15px 0;
+      font-weight: bold;
+    }
+    .testing {
+      background-color: #f39c12;
+      color: white;
+    }
+    .success {
+      background-color: #2ecc71;
+      color: white;
+    }
+    .error {
+      background-color: #e74c3c;
+      color: white;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #serverInfo, #troubleshootTips {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #ecf0f1;
+      border-radius: 4px;
+      display: none;
+    }
+    #troubleshootTips {
+      background-color: #f8f9fa;
+      border-left: 4px solid #e74c3c;
+    }
+    .config-info {
+      background-color: #eee;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>KALIMS Backend Connection Test</h1>
+    
+    <p>This page helps diagnose connection issues between the frontend and backend.</p>
+    
+    <div class="config-info">
+      <p><strong>API Base URL:</strong> <span id="apiBaseUrl">Loading...</span></p>
+      <p><strong>Frontend URL:</strong> <span id="frontendUrl">Loading...</span></p>
+    </div>
+    
+    <div id="connectionStatus" class="status">Ready to test connection</div>
+    
+    <button id="testConnection">Test Connection</button>
+    
+    <div id="serverInfo"></div>
+    
+    <div id="troubleshootTips"></div>
+    
+    <h2>Common Issues</h2>
+    <ul>
+      <li><strong>Failed to fetch</strong> - This usually indicates a network connectivity issue or CORS problem</li>
+      <li><strong>CORS error</strong> - Check if the backend ALLOWED_ORIGINS includes the frontend origin</li>
+      <li><strong>404 Not Found</strong> - The API endpoint doesn't exist or the URL is incorrect</li>
+      <li><strong>500 Server Error</strong> - There's an issue with the backend server</li>
+    </ul>
+  </div>
+
+  <!-- Load scripts -->
+  <script src="js/api-config.js"></script>
+  <script src="js/connection-test.js"></script>
+  
+  <script>
+    // Display configuration information
+    document.addEventListener('DOMContentLoaded', () => {
+      // Show API base URL
+      const apiBaseUrlElement = document.getElementById('apiBaseUrl');
+      if (apiBaseUrlElement) {
+        apiBaseUrlElement.textContent = window.API_BASE_URL || 'Not defined';
+      }
+      
+      // Show frontend URL
+      const frontendUrlElement = document.getElementById('frontendUrl');
+      if (frontendUrlElement) {
+        frontendUrlElement.textContent = window.location.origin;
+      }
+    });
+  </script>
+</body>
+</html>

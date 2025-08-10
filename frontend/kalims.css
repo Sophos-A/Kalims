@@ -1,0 +1,63 @@
+body{
+    background-color:#A1D998 ;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+
+    background: 
+        linear-gradient(to bottom, #0f3d27, #14532d),
+        url('https://www.google.com/url?sa=i&url=https%3A%2F%2Fmanjehealth.com%2Fghana%2Fhospitals%2F6669eb84989dbff18e31efe3&psig=AOvVaw3LqHufN8xt4kTcxcwdTeD-&ust=1753307012153000&source=images&cd=vfe&opi=89978449&ved=0CBgQjhxqFwoTCJifmuG30Y4DFQAAAAAdAAAAABAE');
+      background-size: cover;
+      background-position: center;
+}
+
+.logoheader{
+    padding: 20px;
+}
+
+.pic{
+    font-size: 24px;
+    font-weight: bold;
+    display: inline-block;
+    padding: 10px 20px;
+
+     
+}
+
+.text{
+    text-align: end;
+    padding-right: 5%;
+    padding-top: -10px;
+    margin-top: -11%;
+    font-size: 60px;
+    color: #d1fae5;
+}
+
+.opt{
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 100px;
+}
+
+.select{
+    text-decoration: none;
+    color: #166534;
+    background-color: #f2f2f2;
+    border: 2px solid#ccc;
+    padding: 80px 100px;
+    border-radius: 12px;
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+.select:hover{
+    background-color: #a7cea1;
+    transform: scale(1.05);
+}
+
+
+
+
+
+

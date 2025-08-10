@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment - KALIMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .booking-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+        
+        .btn-secondary {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #1976D2;
+        }
+        
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        
+        .appointment-list {
+            margin-top: 2rem;
+        }
+        
+        .appointment-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f9f9f9;
+        }
+        
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .appointment-date {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .appointment-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        
+        .status-scheduled {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .status-confirmed {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .status-cancelled {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .appointment-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .notification {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .notification.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .notification.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-calendar-plus"></i> Book Appointment</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+        </div>
+    </div>
+
+    <div class="booking-container">
+        <div id="notification" class="notification"></div>
+        
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label for="doctor">Select Doctor:</label>
+                <select id="doctor" required>
+                    <option value="">Choose a doctor</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="appointmentDate">Appointment Date & Time:</label>
+                <input type="datetime-local" id="appointmentDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="appointmentType">Appointment Type:</label>
+                <select id="appointmentType" required>
+                    <option value="">Choose appointment type</option>
+                    <option value="consultation">Consultation</option>
+                    <option value="follow-up">Follow-up</option>
+                    <option value="check-up">Check-up</option>
+                    <option value="procedure">Procedure</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="reason">Reason for Appointment:</label>
+                <textarea id="reason" placeholder="Briefly describe the reason for your appointment"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Additional Notes:</label>
+                <textarea id="notes" placeholder="Any additional information for the doctor"></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-calendar-check"></i> Book Appointment
+            </button>
+        </form>
+        
+        <div class="appointment-list">
+            <h2><i class="fas fa-list"></i> Your Appointments</h2>
+            <div id="appointmentsContainer">
+                <p>Loading appointments...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get patient ID from localStorage
+        const patientId = localStorage.getItem('patientId');
+        
+        if (!patientId) {
+            window.location.href = 'login.html';
+        }
+        
+        // Load doctors and appointments on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDoctors();
+            loadAppointments();
+            
+            // Set min date for appointment booking to today
+            const now = new Date();
+            const minDate = now.toISOString().slice(0, 16);
+            document.getElementById('appointmentDate').min = minDate;
+        });
+        
+        // Load doctors from backend
+        async function loadDoctors() {
+            try {
+                const response = await fetch('/api/doctors');
+                const doctors = await response.json();
+                
+                const doctorSelect = document.getElementById('doctor');
+                doctors.forEach(doctor => {
+                    const option = document.createElement('option');
+                    option.value = doctor.id;
+                    option.textContent = `${doctor.name} - ${doctor.specialty}`;
+                    doctorSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+                showNotification('Failed to load doctors. Please try again.', 'error');
+            }
+        }
+        
+        // Load appointments for current patient
+        async function loadAppointments() {
+            try {
+                const response = await fetch(`/api/appointments/patient/${patientId}`);
+                const appointments = await response.json();
+                
+                const container = document.getElementById('appointmentsContainer');
+                if (appointments.length === 0) {
+                    container.innerHTML = '<p>No appointments found.</p>';
+                    return;
+                }
+                
+                container.innerHTML = appointments.map(appointment => `
+                    <div class="appointment-item">
+                        <div class="appointment-header">
+                            <div class="appointment-date">
+                                ${new Date(appointment.appointment_date).toLocaleString()}
+                            </div>
+                            <div class="appointment-status status-${appointment.status}">
+                                ${appointment.status}
+                            </div>
+                        </div>
+                        <div class="appointment-doctor">
+                            <strong>Doctor:</strong> ${appointment.doctor_name} (${appointment.doctor_specialty})
+                        </div>
+                        <div class="appointment-type">
+                            <strong>Type:</strong> ${appointment.appointment_type}
+                        </div>
+                        <div class="appointment-reason">
+                            <strong>Reason:</strong> ${appointment.reason || 'N/A'}
+                        </div>
+                        <div class="appointment-notes">
+                            <strong>Notes:</strong> ${appointment.notes || 'N/A'}
+                        </div>
+                        <div class="appointment-actions">
+                            ${appointment.status === 'scheduled' ? `
+                                <button class="btn btn-secondary" onclick="confirmAppointment(${appointment.id})">
+                                    <i class="fas fa-check"></i> Confirm
+                                </button>
+                                <button class="btn btn-danger" onclick="cancelAppointment(${appointment.id})">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            ` : ''}
+                            ${appointment.status === 'confirmed' ? `
+                                <button class="btn btn-danger" onclick="cancelAppointment(${appointment.id})">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                document.getElementById('appointmentsContainer').innerHTML = 
+                    '<p>Failed to load appointments. Please try again.</p>';
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById('appointmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const doctorId = document.getElementById('doctor').value;
+            const appointmentDate = document.getElementById('appointmentDate').value;
+            const appointmentType = document.getElementById('appointmentType').value;
+            const reason = document.getElementById('reason').value;
+            const notes = document.getElementById('notes').value;
+            
+            if (!doctorId || !appointmentDate || !appointmentType) {
+                showNotification('Please fill in all required fields.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/appointments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        patientId: parseInt(patientId),
+                        doctorId: parseInt(doctorId),
+                        appointmentDate: appointmentDate,
+                        appointmentType: appointmentType,
+                        reason: reason,
+                        notes: notes
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showNotification('Appointment booked successfully!', 'success');
+                    document.getElementById('appointmentForm').reset();
+                    loadAppointments();
+                } else {
+                    showNotification(result.error || 'Failed to book appointment.', 'error');
+                }
+            } catch (error) {
+                console.error('Error booking appointment:', error);
+                showNotification('Failed to book appointment. Please try again.', 'error');
+            }
+        });
+        
+        // Confirm appointment
+        async function confirmAppointment(appointmentId) {
+            try {
+                const response = await fetch(`/api/appointments/${appointmentId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'confirmed'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showNotification('Appointment confirmed successfully!', 'success');
+                    loadAppointments();
+                } else {
+                    showNotification(result.error || 'Failed to confirm appointment.', 'error');
+                }
+            } catch (error) {
+                console.error('Error confirming appointment:', error);
+                showNotification('Failed to confirm appointment. Please try again.', 'error');
+            }
+        }
+        
+        // Cancel appointment
+        async function cancelAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/appointments/${appointmentId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'cancelled'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showNotification('Appointment cancelled successfully!', 'success');
+                    loadAppointments();
+                } else {
+                    showNotification(result.error || 'Failed to cancel appointment.', 'error');
+                }
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                showNotification('Failed to cancel appointment. Please try again.', 'error');
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Go back to previous page
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

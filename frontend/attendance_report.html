@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Reports - KALIMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: #3498db;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .date-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .date-selector input {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .date-selector button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .date-selector button:hover {
+            background: #2980b9;
+        }
+
+        .report-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .summary-card i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+
+        .summary-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .summary-card p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .vulnerability-stats {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .vulnerability-stats h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vulnerability-stats h2 i {
+            color: #3498db;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .stats-table th,
+        .stats-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .stats-table tr:hover {
+            background-color: #f5f7fa;
+        }
+
+        .attendance-table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+        }
+
+        .attendance-table-container h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .attendance-table th,
+        .attendance-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .attendance-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .attendance-table tr:hover {
+            background-color: #f5f7fa;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-checked-in {
+            background-color: #e8f4f8;
+            color: #3498db;
+        }
+
+        .status-checked-out {
+            background-color: #e8f8f5;
+            color: #27ae60;
+        }
+
+        .status-no-show {
+            background-color: #fdf2e9;
+            color: #e67e22;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+
+        .error {
+            background-color: #fdf2e9;
+            color: #e74c3c;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .export-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .export-btn:hover {
+            background: #219653;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .date-selector {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .date-selector input,
+            .date-selector button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-hospital"></i>
+                    <h1>KALIMS Hospital System</h1>
+                </div>
+                <div class="date-selector">
+                    <input type="date" id="reportDate" value="">
+                    <button id="generateReport"><i class="fas fa-chart-line"></i> Generate Report</button>
+                </div>
+            </div>
+        </header>
+
+        <div id="loading" class="loading" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i> Generating report...
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="reportContent">
+            <div class="report-summary">
+                <div class="summary-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Total Patients</h3>
+                    <p id="totalPatients">0</p>
+                </div>
+                <div class="summary-card">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <h3>Checked In</h3>
+                    <p id="checkedIn">0</p>
+                </div>
+                <div class="summary-card">
+                    <i class="fas fa-user-check"></i>
+                    <h3>Completed</h3>
+                    <p id="completed">0</p>
+                </div>
+                <div class="summary-card">
+                    <i class="fas fa-user-times"></i>
+                    <h3>No Shows</h3>
+                    <p id="noShows">0</p>
+                </div>
+            </div>
+
+            <div class="vulnerability-stats">
+                <h2><i class="fas fa-shield-alt"></i> Vulnerability Factors</h2>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Factor</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vulnerabilityStatsBody">
+                        <tr>
+                            <td colspan="2">No data available</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="attendance-table-container">
+                <h2><i class="fas fa-clipboard-list"></i> Attendance Details</h2>
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>Patient ID</th>
+                            <th>Name</th>
+                            <th>Gender</th>
+                            <th>Category</th>
+                            <th>Check-in Method</th>
+                            <th>Action</th>
+                            <th>Notes</th>
+                            <th>Time</th>
+                            <th>Queue Number</th>
+                            <th>Doctor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        <tr>
+                            <td colspan="11">No data available</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button id="exportCSV" class="export-btn" style="display: none;">
+                    <i class="fas fa-file-csv"></i> Export as CSV
+                </button>
+            </div>
+        </div>
+
+        <footer>
+            <p>KALIMS Hospital System &copy; 2025 | Real-time Patient Management</p>
+        </footer>
+    </div>
+
+    <script>
+        // Set default date to today
+        document.getElementById('reportDate').valueAsDate = new Date();
+
+        // Generate report when button is clicked
+        document.getElementById('generateReport').addEventListener('click', generateReport);
+
+        // Export CSV when button is clicked
+        document.getElementById('exportCSV').addEventListener('click', exportCSV);
+
+        async function generateReport() {
+            const date = document.getElementById('reportDate').value;
+            if (!date) {
+                showError('Please select a date');
+                return;
+            }
+
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('exportCSV').style.display = 'none';
+
+            try {
+                const response = await fetch(`/api/reports/daily?date=${date}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to generate report');
+                }
+
+                // Update summary cards
+                document.getElementById('totalPatients').textContent = data.summary.total_patients || 0;
+                document.getElementById('checkedIn').textContent = data.summary.checked_in || 0;
+                document.getElementById('completed').textContent = data.summary.completed || 0;
+                document.getElementById('noShows').textContent = data.summary.no_shows || 0;
+
+                // Update vulnerability stats
+                updateVulnerabilityStats(data.vulnerabilityStats);
+
+                // Update attendance table
+                updateAttendanceTable(data.attendance);
+
+                // Show export button
+                document.getElementById('exportCSV').style.display = 'block';
+            } catch (error) {
+                console.error('Error generating report:', error);
+                showError(error.message || 'Failed to generate report');
+            } finally {
+                // Hide loading indicator
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function updateVulnerabilityStats(stats) {
+            const tbody = document.getElementById('vulnerabilityStatsBody');
+            tbody.innerHTML = '';
+
+            if (!stats || stats.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2">No vulnerability data available</td></tr>';
+                return;
+            }
+
+            stats.forEach(stat => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${stat.vulnerability_factor || 'N/A'}</td>
+                    <td>${stat.patient_count || 0}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateAttendanceTable(attendance) {
+            const tbody = document.getElementById('attendanceTableBody');
+            tbody.innerHTML = '';
+
+            if (!attendance || attendance.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11">No attendance data available</td></tr>';
+                return;
+            }
+
+            attendance.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.patient_id || 'N/A'}</td>
+                    <td>${record.patient_name || 'N/A'}</td>
+                    <td>${record.gender || 'N/A'}</td>
+                    <td>${record.category || 'N/A'}</td>
+                    <td>${record.check_in_method || 'N/A'}</td>
+                    <td>${record.action || 'N/A'}</td>
+                    <td>${record.notes || 'N/A'}</td>
+                    <td>${record.action_time ? new Date(record.action_time).toLocaleTimeString() : 'N/A'}</td>
+                    <td>${record.display_number || 'N/A'}</td>
+                    <td>${record.doctor_name || 'N/A'}</td>
+                    <td>
+                        <span class="status-badge status-${record.queue_status || record.status}">
+                            ${record.queue_status || record.status || 'N/A'}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function exportCSV() {
+            const date = document.getElementById('reportDate').value;
+            window.location.href = `/api/reports/export?date=${date}`;
+        }
+
+        // Generate report for today on page load
+        window.addEventListener('load', generateReport);
+    </script>
+</body>
+</html>

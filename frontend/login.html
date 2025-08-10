@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KBTH - Login</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="api-config.js"></script>
+    <style>
+        .login-container {
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #eee;
+            z-index: 1;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+            color: #666;
+        }
+
+        .create-account {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .create-account a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .create-account a:hover {
+            text-decoration: underline;
+        }
+
+        .back-home {
+            display: block;
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .back-home:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="korle-bu-686x700-removebg-preview.png" alt="KBTH Logo" class="hospital-logo">
+        </div>
+    </header>
+        
+    <main class="container">
+        <div class="login-container">
+            <h2 class="form-title">Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" required 
+                           placeholder="Enter your email address">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" required
+                           placeholder="Enter your password">
+
+                </div>
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+            
+            
+            <a href="entry.html" class="back-home">← Back to Home</a>
+        </div>
+    </main>
+
+    <script src="js/api-config.js"></script>
+    <script src="js/api-client.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const loginButton = document.querySelector('button[type="submit"]');
+            const originalButtonText = loginButton.textContent;
+            
+            try {
+                // Show loading state
+                loginButton.disabled = true;
+                loginButton.textContent = 'Signing in...';
+                
+                // Get existing users from localStorage (for demo - in production this would be an API call)
+                const users = JSON.parse(localStorage.getItem('patientUsers')) || [];
+                const patients = JSON.parse(localStorage.getItem('patients')) || [];
+                
+                // Find user by email
+                const user = users.find(u => u.email === email);
+                
+                if (!user) {
+                    throw new Error('Invalid email or password');
+                }
+                
+                // Check password (in a real app, this would be hashed and verified server-side)
+                if (user.password !== password) {
+                    throw new Error('Invalid email or password');
+                }
+                
+                console.log('Login successful for user:', user.email);
+                
+                // Find the patient record
+                console.log('Looking for patient with email:', email);
+                console.log('Available patients:', patients);
+                
+                const patient = patients.find(p => p.email === email);
+                if (!patient) {
+                    console.error('Patient record not found for email:', email);
+                    alert('Your patient record was not found. Please register as a new patient.');
+                    window.location.href = 'patient_register.html';
+                    return;
+                }
+                
+                console.log('Patient record found:', patient);
+                
+                // Set current user session
+                localStorage.setItem('currentUser', JSON.stringify(patient));
+                
+                try {
+                    console.log('Attempting to check in patient with ID:', patient.patientId);
+                    
+                    // Use the proper patient login check-in endpoint
+                    const response = await callApi(API_ENDPOINTS.CHECKIN.PATIENT_LOGIN, 'POST', {
+                        patientId: patient.patientId,
+                        patientEmail: patient.email,
+                        checkInMethod: 'web'
+                    });
+                    
+                    console.log('Check-in successful:', response);
+                    
+                    // Store comprehensive queue and visit information
+                    localStorage.setItem('queueInfo', JSON.stringify({
+                        queueId: response.queue.id,
+                        visitId: response.visit.id,
+                        position: response.queue.position,
+                        estimatedWaitTime: response.queue.estimated_wait_time,
+                        queueType: response.queue.queue_type,
+                        checkInTime: new Date().toISOString(),
+                        patientName: response.patient.name
+                    }));
+                    
+                    // Redirect to queue status page
+                    window.location.href = 'logedin.html';
+                    
+                } catch (error) {
+                    console.error('Check-in error:', error);
+                    alert(`Check-in failed: ${error.message}. Please try again or contact staff for assistance.`);
+                    loginButton.disabled = false;
+                    loginButton.textContent = originalButtonText;
+                    return;
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                alert(error.message || 'Login failed. Please try again.');
+                loginButton.disabled = false;
+                loginButton.textContent = originalButtonText;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management - KALIMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .management-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+        
+        .btn-secondary {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #1976D2;
+        }
+        
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        
+        .btn-warning {
+            background-color: #FF9800;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #F57C00;
+        }
+        
+        .staff-list {
+            margin-top: 2rem;
+        }
+        
+        .staff-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f9f9f9;
+        }
+        
+        .staff-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .staff-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.2rem;
+        }
+        
+        .staff-role {
+            color: #2196F3;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+        
+        .staff-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .status-inactive {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .staff-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .notification {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .notification.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .notification.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .search-box {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-users"></i> Staff Management</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+        </div>
+    </div>
+
+    <div class="management-container">
+        <div id="notification" class="notification"></div>
+        
+        <div class="form-section">
+            <h2><i class="fas fa-plus-circle"></i> Add New Staff Member</h2>
+            <form id="staffForm">
+                <div class="form-group">
+                    <label for="staffName">Staff Name:</label>
+                    <input type="text" id="staffName" required placeholder="Enter staff member's full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="staffEmail">Email:</label>
+                    <input type="email" id="staffEmail" required placeholder="Enter staff member's email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="staffRole">Role:</label>
+                    <select id="staffRole" required>
+                        <option value="">Select a role</option>
+                        <option value="admin">Admin</option>
+                        <option value="receptionist">Receptionist</option>
+                        <option value="nurse">Nurse</option>
+                        <option value="doctor">Doctor</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Add Staff Member
+                </button>
+            </form>
+        </div>
+        
+        <div class="staff-list">
+            <h2><i class="fas fa-list"></i> Staff Members</h2>
+            <input type="text" id="searchBox" class="search-box" placeholder="Search staff members..." onkeyup="filterStaff()">
+            
+            <div id="staffContainer">
+                <p>Loading staff members...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load staff on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStaff();
+        });
+        
+        // Load all staff members from backend
+        async function loadStaff() {
+            try {
+                const response = await fetch('/api/staff');
+                const staff = await response.json();
+                
+                const container = document.getElementById('staffContainer');
+                if (staff.length === 0) {
+                    container.innerHTML = '<p>No staff members found.</p>';
+                    return;
+                }
+                
+                container.innerHTML = staff.map(member => `
+                    <div class="staff-item" data-staff-name="${member.name.toLowerCase()}">
+                        <div class="staff-header">
+                            <div class="staff-name">${member.name}</div>
+                            <div class="staff-status status-${member.active ? 'active' : 'inactive'}">
+                                ${member.active ? 'Active' : 'Inactive'}
+                            </div>
+                        </div>
+                        <div class="staff-email">
+                            <strong>Email:</strong> ${member.email}
+                        </div>
+                        <div class="staff-role">
+                            <strong>Role:</strong> ${member.role}
+                        </div>
+                        <div class="staff-created">
+                            <strong>Created:</strong> ${new Date(member.created_at).toLocaleDateString()}
+                        </div>
+                        <div class="staff-actions">
+                            <button class="btn btn-secondary" onclick="editStaff(${member.id})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteStaff(${member.id})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading staff:', error);
+                document.getElementById('staffContainer').innerHTML = 
+                    '<p>Failed to load staff members. Please try again.</p>';
+            }
+        }
+        
+        // Handle form submission for adding new staff member
+        document.getElementById('staffForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('staffName').value;
+            const email = document.getElementById('staffEmail').value;
+            const role = document.getElementById('staffRole').value;
+            
+            try {
+                const response = await fetch('/api/staff', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        role: role
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showNotification('Staff member added successfully!', 'success');
+                    document.getElementById('staffForm').reset();
+                    loadStaff();
+                } else {
+                    showNotification(result.error || 'Failed to add staff member.', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding staff member:', error);
+                showNotification('Failed to add staff member. Please try again.', 'error');
+            }
+        });
+        
+        // Edit staff member (placeholder function)
+        async function editStaff(staffId) {
+            // In a real implementation, this would open a modal or form to edit the staff member
+            alert('Edit functionality would be implemented here. Staff ID: ' + staffId);
+        }
+        
+        // Delete staff member
+        async function deleteStaff(staffId) {
+            if (!confirm('Are you sure you want to delete this staff member? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/staff/${staffId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showNotification('Staff member deleted successfully!', 'success');
+                    loadStaff();
+                } else {
+                    showNotification(result.error || 'Failed to delete staff member.', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting staff member:', error);
+                showNotification('Failed to delete staff member. Please try again.', 'error');
+            }
+        }
+        
+        // Filter staff based on search input
+        function filterStaff() {
+            const searchValue = document.getElementById('searchBox').value.toLowerCase();
+            const staffItems = document.querySelectorAll('.staff-item');
+            
+            staffItems.forEach(item => {
+                const staffName = item.getAttribute('data-staff-name');
+                if (staffName.includes(searchValue)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Go back to previous page
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - KALIMS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .redirect-message {
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .redirect-message h1 {
+            color: #333;
+        }
+        .redirect-message p {
+            color: #666;
+        }
+        .redirect-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .redirect-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-message">
+        <h1>Reports Page</h1>
+        <p>The reports functionality has been moved to a new page.</p>
+        <p>Redirecting to <a href="attendance_report.html" class="redirect-link">Attendance Reports</a>...</p>
+    </div>
+    
+    <script>
+        // Redirect to attendance report page after 3 seconds
+        setTimeout(function() {
+            window.location.href = 'attendance_report.html';
+        }, 3000);
+    </script>
+</body>
+</html>

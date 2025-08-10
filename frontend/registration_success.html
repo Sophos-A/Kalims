@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Successful - KBTH Triage System</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+
+        .patient-id {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+
+        .instructions {
+            background: #e9f7ef;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+
+        .btn-login {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .page-title {
+            text-align: center;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="korle-bu-686x700-removebg-preview.png" alt="KBTH Logo" class="hospital-logo">
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="welcome-message">
+            <h2>Korle Bu Teaching Hospital</h2>
+            <p class="tagline">Registration Successful</p>
+        </div>
+        
+        <div class="success-container">
+            <div class="success-icon">✓</div>
+            <h3 class="page-title">Registration Complete!</h3>
+            
+            <p>Your registration has been successfully completed. Please save your Patient ID for future reference:</p>
+            
+            <div class="patient-id" id="patientIdDisplay">Loading...</div>
+            
+            <div class="instructions">
+                <h4>Next Steps:</h4>
+                <ul>
+                    <li>Save your Patient ID in a secure location</li>
+                    <li>You can now sign in using your email and password</li>
+                    <li>Your account is active and ready to use</li>
+                </ul>
+            </div>
+            
+            <a href="login.html" class="btn-login">Proceed to Login</a>
+        </div>
+    </main>
+
+    <script>
+        // Get patient ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const patientId = urlParams.get('id');
+        
+        if (patientId) {
+            document.getElementById('patientIdDisplay').textContent = patientId;
+        } else {
+            document.getElementById('patientIdDisplay').textContent = 'Error: Patient ID not found';
+        }
+        
+        // Auto redirect to login after 10 seconds
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 10000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitals Queue - KBTH</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .status-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .status-title {
+            color: var(--primary-dark);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .status-message {
+            color: #555;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .queue-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 5px solid var(--primary);
+        }
+
+        .queue-position {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+
+        .queue-label {
+            font-size: 1rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .refresh-btn {
+            background: none;
+            border: none;
+            color: #4285f4;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 8px;
+            padding: 2px 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            background-color: rgba(66, 133, 244, 0.1);
+            transform: rotate(30deg);
+        }
+        
+        .refresh-btn:active {
+            transform: rotate(360deg);
+        }
+
+        .patient-details {
+            text-align: left;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .detail-value {
+            color: #333;
+        }
+
+        .btn-home {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-home:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .estimated-wait {
+            color: #e67e22;
+            font-weight: 600;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .status-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .status-title {
+                font-size: 1.5rem;
+            }
+            
+            .queue-position {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="korle-bu-686x700-removebg-preview.png" alt="KBTH Logo" class="hospital-logo">
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="status-container">
+            <div class="status-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
+                </svg>
+            </div>
+            
+            <h1 class="status-title">Vitals Queue</h1>
+            <p class="status-message">Thank you for registering at Korle Bu Teaching Hospital. Here's your current status in the queue.</p>
+            
+            <div class="queue-info">
+                <div class="queue-position" id="queuePosition">-</div>
+                <div class="queue-label">Your Position in Queue</div>
+                <div class="estimated-wait" id="estimatedWait">Estimated wait time: Calculating...</div>
+                <div class="queue-label" style="margin-top: 10px; font-size: 0.8rem;">
+                    Last updated: <span id="lastChecked">-</span>
+                    <button id="refreshBtn" class="refresh-btn" title="Refresh queue status">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="patient-details">
+                <div class="detail-row">
+                    <span class="detail-label">Patient ID:</span>
+                    <span class="detail-value" id="patientId">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value" id="patientName">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date Registered:</span>
+                    <span class="detail-value" id="registrationDate">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Queue Entry Time:</span>
+                    <span class="detail-value" id="queueEntryTime">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Turn Time (Est.):</span>
+                    <span class="detail-value" id="turnTime">-</span>
+                </div>
+            </div>
+            
+            <div class="status-message">
+                Please have a seat in the waiting area. We'll call your number when it's your turn.
+                <br>
+                <small>Average wait time is approximately 30-45 minutes.</small>
+            </div>
+            
+            <a href="patientsignin.html" class="btn-home">Return to Portal</a>
+        </div>
+        
+        <!-- Consultation Queue Section -->
+        <div class="status-container" style="margin-top: 3rem;">
+            <div class="status-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            
+            <h1 class="status-title">Consultation Queue</h1>
+            <p class="status-message">Your status for the doctor's consultation will appear here after your vitals check.</p>
+            
+            <div class="queue-info" style="border-left-color: #3498db;">
+                <div class="queue-position" id="consultationQueuePosition">-</div>
+                <div class="queue-label">Your Position in Queue</div>
+                <div class="estimated-wait" id="consultationWait">Please complete your vitals check first</div>
+                <div class="queue-label" style="margin-top: 10px; font-size: 0.8rem;">
+                    Last updated: <span id="consultationLastChecked">-</span>
+                    <button id="refreshConsultationBtn" class="refresh-btn" title="Refresh consultation status">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="patient-details">
+                <div class="detail-row">
+                    <span class="detail-label">Patient ID:</span>
+                    <span class="detail-value" id="consultationPatientId">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value" id="consultationStatus">Awaiting vitals check</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date Registered:</span>
+                    <span class="detail-value" id="consultationRegistrationDate">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Queue Entry Time:</span>
+                    <span class="detail-value" id="consultationQueueEntryTime">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Turn Time (Est.):</span>
+                    <span class="detail-value" id="consultationTurnTime">-</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/api-config.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/websocket-client.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Get queue info from localStorage
+            const queueInfo = JSON.parse(localStorage.getItem('queueInfo') || '{}');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            console.log('Retrieved currentUser from localStorage:', currentUser);
+            
+            if (!currentUser.patientId) {
+                // No patient data, redirect to login
+                console.error('No patient ID found in currentUser data');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Display patient information
+            document.getElementById('patientName').textContent = currentUser.fullName || 'N/A';
+            document.getElementById('patientDob').textContent = currentUser.dateOfBirth || 'N/A';
+            document.getElementById('patientGender').textContent = currentUser.sex || 'N/A';
+            document.getElementById('patientId').textContent = currentUser.patientId || 'N/A';
+            
+            // Initial queue update
+            await updateQueueStatus();
+            
+            // Set up periodic refresh as fallback (every 30 seconds)
+            const refreshInterval = setInterval(updateQueueStatus, 30000);
+            
+            // Set up WebSocket for real-time updates
+            if (window.webSocketClient) {
+                // Subscribe to queue updates
+                webSocketClient.subscribe('queue');
+                // Subscribe to patient-specific updates
+                webSocketClient.subscribe(`patient-${currentUser.patientId}`);
+                
+                // Register callback for queue updates
+                webSocketClient.onQueueUpdate((queueType, queueData) => {
+                    console.log('Real-time queue update received:', queueType, queueData);
+                    
+                    // Check if this update is for the current patient
+                    if (queueData.queueId === queueInfo.queueId) {
+                        // Update the queue info in localStorage
+                        queueInfo.position = queueData.position;
+                        queueInfo.estimatedWaitTime = queueData.estimated_wait_time;
+                        localStorage.setItem('queueInfo', JSON.stringify(queueInfo));
+                        
+                        // Update the UI
+                        updateQueueUI(queueData);
+                    }
+                });
+            }
+            
+            // Clean up when page is unloaded
+            window.addEventListener('beforeunload', () => {
+                clearInterval(refreshInterval);
+                if (window.webSocketClient) {
+                    webSocketClient.unsubscribe('queue');
+                }
+            });
+            
+            // Function to update queue information
+            async function updateQueueStatus() {
+                try {
+                    console.log('Fetching queue status for ID:', queueInfo.queueId);
+                    
+                    // Get current queue status from API
+                    const response = await fetch(`${API_BASE}/api/queue/status/${queueInfo.queueId}`);
+                    
+                    console.log('Queue status API response:', response.status);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Queue status API error:', errorText);
+                        throw new Error('Failed to get queue status: ' + errorText);
+                    }
+                    
+                    const queueData = await response.json();
+                    console.log('Queue data received:', queueData); // Log the received data
+                    
+                    // Update the queue info in localStorage
+                    queueInfo.position = queueData.position;
+                    queueInfo.estimatedWaitTime = queueData.estimated_wait_time;
+                    queueInfo.patientId = queueData.patientId;
+                    queueInfo.registrationDate = queueData.registrationDate;
+                    queueInfo.queueEntryTime = queueData.queueEntryTime;
+                    localStorage.setItem('queueInfo', JSON.stringify(queueInfo));
+                    
+                    // Update the UI
+                    updateQueueUI(queueData);
+                    
+                } catch (error) {
+                    console.error('Error updating queue status:', error);
+                    // Fall back to the stored queue info
+                    updateQueueUI(queueInfo);
+                    
+                    // Make sure patient information is displayed even if API fails
+                    document.getElementById('patientName').textContent = currentUser.fullName || 'N/A';
+                    document.getElementById('patientId').textContent = currentUser.patientId || 'N/A';
+                    document.getElementById('patientDob').textContent = currentUser.dateOfBirth || 'N/A';
+                    document.getElementById('patientGender').textContent = currentUser.sex || 'N/A';
+                    
+                    // Show a more helpful error message
+                    const statusMessage = document.querySelector('.status-message');
+                    if (statusMessage) {
+                        statusMessage.textContent = 'We are experiencing technical difficulties with our queue system. ' +
+                            'Your information has been saved, and you can proceed to the vitals check area.';
+                    }
+                }
+                
+                // Update last checked time with GMT
+                document.getElementById('lastChecked').textContent = new Date().toUTCString().split(' ')[4];
+            }
+            
+            // Function to update the queue UI
+            function updateQueueUI(queueData) {
+                const position = queueData.position || queueInfo.position || 'N/A';
+                const waitTime = queueData.estimated_wait_time || queueInfo.estimatedWaitTime || 'N/A';
+                const minWaitTime = queueData.min_wait_time || Math.floor(waitTime * 0.8) || 'N/A';
+                const maxWaitTime = queueData.max_wait_time || Math.ceil(waitTime * 1.2) || 'N/A';
+                
+                // Update the DOM
+                document.getElementById('queuePosition').textContent = position;
+                
+                // Display wait time as a range if min and max are available
+                if (minWaitTime !== 'N/A' && maxWaitTime !== 'N/A') {
+                    document.getElementById('estimatedWait').textContent = `${minWaitTime}-${maxWaitTime}`;
+                } else {
+                    document.getElementById('estimatedWait').textContent = waitTime;
+                }
+                
+                // Update patient details
+                console.log('Queue data received in updateQueueUI:', queueData);
+                // Try all possible variations of patient ID field
+                document.getElementById('patientId').textContent = queueData.patient_id || queueData.patientid || queueData.patientId || currentUser.patientId || 'N/A';
+                
+                // Update registration date with GMT
+                console.log('Registration date:', queueData.registrationDate || queueData.registration_date);
+                if (queueData.registrationDate || queueData.registration_date) {
+                    const regDate = new Date(queueData.registrationDate || queueData.registration_date);
+                    document.getElementById('registrationDate').textContent = regDate.toUTCString().split(' ').slice(0, 4).join(' ');
+                } else if (currentUser.registrationDate) {
+                    const regDate = new Date(currentUser.registrationDate);
+                    document.getElementById('registrationDate').textContent = regDate.toUTCString().split(' ').slice(0, 4).join(' ');
+                }
+                
+                // Update queue entry time with GMT
+                console.log('Queue entry time:', queueData.queueEntryTime || queueData.queueentrytime);
+                if (queueData.queueEntryTime || queueData.queueentrytime || queueData.createdat) {
+                    const entryTime = new Date(queueData.queueEntryTime || queueData.queueentrytime || queueData.createdat);
+                    document.getElementById('queueEntryTime').textContent = entryTime.toUTCString().split(' ')[4];
+                } else if (queueData.checkInTime || queueData.checkintime) {
+                    const entryTime = new Date(queueData.checkInTime || queueData.checkintime);
+                    document.getElementById('queueEntryTime').textContent = entryTime.toUTCString().split(' ')[4];
+                }
+                
+                // Calculate and update estimated turn time with GMT
+                if (waitTime !== 'N/A') {
+                    const now = new Date();
+                    const turnTime = new Date(now.getTime() + waitTime * 60000); // Convert minutes to milliseconds
+                    document.getElementById('turnTime').textContent = turnTime.toUTCString().split(' ')[4];
+                }
+                
+                // Update status message based on position
+                const statusMessage = document.getElementById('statusMessage');
+                const statusIcon = document.querySelector('.status-icon');
+                
+                if (position === 0 || position === 'N/A') {
+                    statusMessage.textContent = 'Queue information unavailable. Please check with reception.';
+                    statusIcon.innerHTML = '<i class="fas fa-question-circle" style="color: #6c757d;"></i>';
+                } else if (position === 1) {
+                    statusMessage.textContent = 'IT IS YOUR TURN NOW! Please proceed immediately to the vitals station.';
+                    // Change icon to green checkmark
+                    statusIcon.innerHTML = '<i class="fas fa-check-circle" style="color: #28a745;"></i>';
+                    // Add pulsing animation to the icon
+                    const iconElement = statusIcon.querySelector('i');
+                    if (iconElement) {
+                        iconElement.style.animation = 'pulse 1.5s infinite';
+                    }
+                    // Play notification sound
+                    playNotificationSound();
+                    // Show desktop notification if supported
+                    showNotification('It\'s Your Turn!', 'Please proceed to the vitals station immediately.');
+                } else if (position <= 3) {
+                    statusMessage.textContent = 'You are next in line. Please wait in the waiting area. You will be called very soon.';
+                    // Change icon to yellow warning
+                    statusIcon.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #ffc107;"></i>';
+                } else if (position <= 5) {
+                    const waitTimeText = minWaitTime !== 'N/A' && maxWaitTime !== 'N/A' ? 
+                        `${minWaitTime}-${maxWaitTime}` : waitTime;
+                    statusMessage.textContent = `Your wait time is approximately ${waitTimeText} minutes. Please remain in the waiting area.`;
+                    statusIcon.innerHTML = '<i class="fas fa-clock" style="color: #17a2b8;"></i>';
+                } else {
+                    const waitTimeText = minWaitTime !== 'N/A' && maxWaitTime !== 'N/A' ? 
+                        `${minWaitTime}-${maxWaitTime}` : waitTime;
+                    statusMessage.textContent = `Your estimated wait time is ${waitTimeText} minutes. You may leave and return closer to your appointment time.`;
+                    statusIcon.innerHTML = '<i class="fas fa-hourglass-half" style="color: #6c757d;"></i>';
+                }
+                
+                // Add a pulsing animation style if not already present
+                if (!document.getElementById('pulseAnimation')) {
+                    const style = document.createElement('style');
+                    style.id = 'pulseAnimation';
+                    style.textContent = `
+                        @keyframes pulse {
+                            0% { transform: scale(1); }
+                            50% { transform: scale(1.2); }
+                            100% { transform: scale(1); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                // Function to play notification sound
+                function playNotificationSound() {
+                    try {
+                        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                        audio.play();
+                    } catch (e) {
+                        console.error('Could not play notification sound:', e);
+                    }
+                }
+                
+                // Function to show desktop notification
+                function showNotification(title, body) {
+                    if (!('Notification' in window)) {
+                        console.log('This browser does not support desktop notifications');
+                        return;
+                    }
+                    
+                    if (Notification.permission === 'granted') {
+                        new Notification(title, { body: body });
+                    } else if (Notification.permission !== 'denied') {
+                        Notification.requestPermission().then(permission => {
+                            if (permission === 'granted') {
+                                new Notification(title, { body: body });
+                            }
+                        });
+                    }
+                }
+                
+                // Show appropriate queue type
+                const queueType = document.getElementById('queueType');
+                if (queueData.queue_type === 'vitals') {
+                    queueType.textContent = 'Vitals Queue';
+                } else if (queueData.queue_type === 'doctor') {
+                    queueType.textContent = 'Doctor Queue';
+                }
+                
+                // Update check-in time if available with GMT
+                if (queueInfo.checkInTime) {
+                    const checkInTime = new Date(queueInfo.checkInTime);
+                    document.getElementById('checkInTime').textContent = checkInTime.toUTCString().split(' ')[4];
+                }
+                
+                // Update last updated time with GMT
+                document.getElementById('lastChecked').textContent = new Date().toUTCString().split(' ')[4];
+            }
+            
+            // Function to manually refresh queue status
+    async function refreshQueueStatus() {
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        }
+        
+        try {
+            await updateQueueStatus();
+        } catch (error) {
+            console.error('Error manually refreshing queue status:', error);
+        } finally {
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+            }
+        }
+    }
+    
+    // Function to manually refresh consultation status
+    async function refreshConsultationStatus() {
+        const refreshBtn = document.getElementById('refreshConsultationBtn');
+        if (refreshBtn) {
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        }
+        
+        try {
+            await updateConsultationStatus();
+        } catch (error) {
+            console.error('Error manually refreshing consultation status:', error);
+        } finally {
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+            }
+        }
+    }
+            
+            // Handle refresh button click if it exists
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    refreshQueueStatus();
+                });
+            }
+            
+            // Handle consultation refresh button click if it exists
+            const refreshConsultationBtn = document.getElementById('refreshConsultationBtn');
+            if (refreshConsultationBtn) {
+                refreshConsultationBtn.addEventListener('click', function() {
+                    refreshConsultationStatus();
+                });
+            }
+            
+            // Initialize with stored data
+            updateQueueUI(queueInfo);
+            
+            // Set up consultation queue updates
+            async function updateConsultationStatus() {
+                try {
+                    // Check if patient has completed vitals
+                    const vitalsCompleted = queueInfo.vitalsCompleted || false;
+                    
+                    if (vitalsCompleted) {
+                        // Get consultation queue ID from localStorage or API
+                        const consultQueueInfo = JSON.parse(localStorage.getItem('consultQueueInfo') || '{}');
+                        
+                        if (consultQueueInfo.queueId) {
+                            // Get current consultation queue status from API
+                            const response = await fetch(`${API_BASE}/api/queue/status/${consultQueueInfo.queueId}`);
+                            
+                            if (!response.ok) {
+                                throw new Error('Failed to get consultation queue status');
+                            }
+                            
+                            const consultData = await response.json();
+                            
+                            // Update the consultation queue info in localStorage
+                            consultQueueInfo.position = consultData.position;
+                            consultQueueInfo.estimatedWaitTime = consultData.estimated_wait_time;
+                            localStorage.setItem('consultQueueInfo', JSON.stringify(consultQueueInfo));
+                            
+                            // Update the UI
+                            updateConsultationUI(consultData);
+                        }
+                    } else {
+                        // If vitals are not completed yet
+                        document.getElementById('consultationQueuePosition').textContent = '-';
+                        document.getElementById('consultationPatientId').textContent = currentUser.patientId || '-';
+                        document.getElementById('consultationStatus').textContent = 'Awaiting vitals check';
+                        document.getElementById('consultationWait').textContent = 'Please complete your vitals check first';
+                    }
+                    
+                    // Update last checked time with GMT
+                document.getElementById('consultationLastChecked').textContent = new Date().toUTCString().split(' ')[4];
+                } catch (error) {
+                    console.error('Error updating consultation status:', error);
+                }
+            }
+            
+            // Function to update the consultation queue UI
+            function updateConsultationUI(consultData) {
+                const position = consultData.position || 'N/A';
+                const waitTime = consultData.estimated_wait_time || 'N/A';
+                const minWaitTime = consultData.min_wait_time || Math.floor(waitTime * 0.8) || 'N/A';
+                const maxWaitTime = consultData.max_wait_time || Math.ceil(waitTime * 1.2) || 'N/A';
+                
+                // Update the DOM
+                document.getElementById('consultationQueuePosition').textContent = position;
+                document.getElementById('consultationPatientId').textContent = consultData.patient_id || consultData.patientid || consultData.patientId || currentUser.patientId || '-';
+                console.log('Consultation data received:', consultData);
+                
+                // Display wait time as a range if min and max are available
+                if (minWaitTime !== 'N/A' && maxWaitTime !== 'N/A') {
+                    document.getElementById('consultationWait').textContent = `Estimated wait time: ${minWaitTime}-${maxWaitTime} minutes`;
+                } else {
+                    document.getElementById('consultationWait').textContent = `Estimated wait time: ${waitTime} minutes`;
+                }
+                
+                document.getElementById('consultationStatus').textContent = 'In queue for consultation';
+                
+                // Update registration date with GMT
+                if (consultData.registrationDate || consultData.registration_date) {
+                    const regDate = new Date(consultData.registrationDate || consultData.registration_date);
+                    document.getElementById('consultationRegistrationDate').textContent = regDate.toUTCString().split(' ').slice(0, 4).join(' ');
+                } else if (currentUser.registrationDate) {
+                    const regDate = new Date(currentUser.registrationDate);
+                    document.getElementById('consultationRegistrationDate').textContent = regDate.toUTCString().split(' ').slice(0, 4).join(' ');
+                }
+                
+                // Update queue entry time with GMT
+                if (consultData.queueEntryTime || consultData.queueentrytime || consultData.createdat) {
+                    const entryTime = new Date(consultData.queueEntryTime || consultData.queueentrytime || consultData.createdat);
+                    document.getElementById('consultationQueueEntryTime').textContent = entryTime.toUTCString().split(' ')[4];
+                } else if (consultData.checkInTime || consultData.checkintime) {
+                    const entryTime = new Date(consultData.checkInTime || consultData.checkintime);
+                    document.getElementById('consultationQueueEntryTime').textContent = entryTime.toUTCString().split(' ')[4];
+                }
+                
+                // Calculate and update estimated turn time with GMT
+                if (waitTime !== 'N/A') {
+                    const now = new Date();
+                    const turnTime = new Date(now.getTime() + waitTime * 60000); // Convert minutes to milliseconds
+                    document.getElementById('consultationTurnTime').textContent = turnTime.toUTCString().split(' ')[4];
+                }
+                
+                // If it's the patient's turn
+                if (position === 1) {
+                    document.getElementById('consultationStatus').textContent = 'IT IS YOUR TURN NOW! Please proceed to the doctor.';
+                    // Play notification sound
+                    playNotificationSound();
+                    // Show desktop notification if supported
+                    showNotification('It\'s Your Turn!', 'Please proceed to the doctor immediately.');
+                }
+            }
+            
+            // Initial consultation queue update
+            updateConsultationStatus();
+            
+            // Set up periodic refresh for consultation queue as fallback (every 30 seconds)
+            const consultRefreshInterval = setInterval(updateConsultationStatus, 30000);
+            
+            // Set up WebSocket for real-time consultation queue updates
+            if (window.webSocketClient) {
+                // Subscribe to consultation queue updates
+                webSocketClient.subscribe('consultation');
+                // Subscribe to patient-specific consultation updates
+                webSocketClient.subscribe(`patient-${currentUser.patientId}-consultation`);
+                
+                // Register callback for consultation queue updates
+                webSocketClient.onQueueUpdate((queueType, queueData) => {
+                    console.log('Real-time consultation queue update received:', queueType, queueData);
+                    
+                    // Check if this update is for the consultation queue
+                    const consultQueueInfo = JSON.parse(localStorage.getItem('consultQueueInfo') || '{}');
+                    if (queueData.queueId === consultQueueInfo.queueId) {
+                        // Update the consultation queue info in localStorage
+                        consultQueueInfo.position = queueData.position;
+                        consultQueueInfo.estimatedWaitTime = queueData.estimated_wait_time;
+                        localStorage.setItem('consultQueueInfo', JSON.stringify(consultQueueInfo));
+                        
+                        // Update the UI
+                        updateConsultationUI(queueData);
+                    }
+                });
+            }
+            
+            // Clean up consultation queue resources when page is unloaded
+            window.addEventListener('beforeunload', () => {
+                clearInterval(consultRefreshInterval);
+                if (window.webSocketClient) {
+                    webSocketClient.unsubscribe('consultation');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

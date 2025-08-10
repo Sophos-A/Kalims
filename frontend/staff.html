@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal - Korle Bu Teaching Hospital</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="api-config.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #004d00, #006600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .auth-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .dashboard-container {
+            background: #f4f4f4;
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        .header {
+            background-color: #004d00;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .logout-btn:hover {
+            background: #c82333;
+        }
+        
+        .nav {
+            background-color: #333;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav a:hover {
+            background-color: #555;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .title {
+            color: #004d00;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #004d00;
+            box-shadow: 0 0 5px rgba(0, 77, 0, 0.3);
+        }
+        
+        .button {
+            background-color: #004d00;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .button:hover {
+            background-color: #003300;
+        }
+        
+        .button-secondary {
+            background: none;
+            border: none;
+            color: #004d00;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #004d00;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #004d00;
+        }
+        
+        .card h3 {
+            color: #004d00;
+            margin-top: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .auth-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            
+            .container {
+                margin: 20px;
+                padding: 15px;
+            }
+            
+            .nav a {
+                display: block;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    
+    <script>
+        // Authentication state
+        let isAuthenticated = false;
+        let currentUser = null;
+        let currentPage = 'login';
+        
+        // Check if user is already logged in
+        async function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('currentStaffUser');
+            
+            if (token && user) {
+                try {
+                    const response = await callApi(API_ENDPOINTS.AUTH.ME, 'GET');
+                    currentUser = JSON.parse(user);
+                    isAuthenticated = true;
+                    currentPage = 'dashboard';
+                } catch (error) {
+                    console.error('Token verification error:', error);
+                    // Clear invalid token
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('currentStaffUser');
+                }
+            }
+        }
+        
+        // Login function
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('username').value;  // Using email for login
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store the JWT token and user info
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('currentStaffUser', JSON.stringify(data.user));
+                    currentUser = data.user;
+                    isAuthenticated = true;
+                    currentPage = 'dashboard';
+                    renderApp();
+                } else {
+                    alert(data.error || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
+            }
+        }
+        
+        // Signup function
+        async function handleSignup(event) {
+            event.preventDefault();
+            const name = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const staffId = document.getElementById('staffId').value;
+            const department = document.getElementById('department').value;
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            // Map department to valid role
+            let role = 'nurse'; // default role
+            if (department === 'Emergency' || department === 'Internal Medicine' || 
+                department === 'Surgery' || department === 'Pediatrics' || 
+                department === 'Obstetrics & Gynecology') {
+                role = 'doctor';
+            } else if (department === 'Administration') {
+                role = 'admin';
+            } else if (department === 'Nursing') {
+                role = 'nurse';
+            }
+            
+            try {
+                const response = await fetch(API_ENDPOINTS.AUTH.REGISTER, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password, role })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Staff account created successfully! Please login.');
+                    currentPage = 'login';
+                    renderApp();
+                } else {
+                    alert(data.error || 'Signup failed');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('Signup failed. Please try again.');
+            }
+        }
+        
+        // Logout function
+        function handleLogout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentStaffUser');
+            isAuthenticated = false;
+            currentUser = null;
+            currentPage = 'login';
+            renderApp();
+        }
+        
+        // Add patient to triage
+        function handleAddPatient(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('full-name').value;
+            const age = parseInt(document.getElementById('age').value);
+            const dob = document.getElementById('dob').value;
+            const symptoms = document.getElementById('symptoms').value;
+            const priority = document.getElementById('priority').value;
+            
+            const newPatient = {
+                id: 'STAFF-' + Math.random().toString(36).substr(2, 9),
+                name,
+                age,
+                dob,
+                symptoms,
+                priority,
+                attended: false,
+                seenByDoctor: false,
+                remarks: "",
+                addedBy: currentUser.username,
+                addedAt: new Date().toISOString()
+            };
+            
+            let patients = JSON.parse(localStorage.getItem('patients')) || [];
+            patients.push(newPatient);
+            localStorage.setItem('patients', JSON.stringify(patients));
+            
+            document.getElementById('triage-form').reset();
+            alert('Patient added to triage queue successfully!');
+        }
+        
+        // Account management removed - now admin-only via staff_management.html
+        
+        // Staff-only account management functionality
+        function renderStaffAccountManagement() {
+            return `
+                <div class="auth-container">
+                    <h1 style="color: #004d00; margin-bottom: 30px;">Staff Authentication Required</h1>
+                    <p style="color: #666; margin-bottom: 30px; text-align: center;">
+                        Account management requires staff credentials for security.
+                    </p>
+                    <form onsubmit="handleStaffAccountAuth(event)">
+                        <div class="form-group">
+                            <label>Staff Username</label>
+                            <input type="text" id="staff-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Staff Password</label>
+                            <input type="password" id="staff-password" required>
+                        </div>
+                        <button type="submit" class="button">Verify & Access Account Management</button>
+                    </form>
+                    <button type="button" onclick="currentPage='login'; renderApp();" class="button-secondary">Back to Login</button>
+                    <br/>
+                    <a href="entry.html" class="back-link">← Back to Main Portal</a>
+                </div>
+            `;
+        }
+        
+        // Handle staff account management authentication
+        function handleStaffAccountAuth(event) {
+            event.preventDefault();
+            const username = document.getElementById('staff-username').value;
+            const password = document.getElementById('staff-password').value;
+            
+            // Check against staff users
+            const staffUsers = JSON.parse(localStorage.getItem('staffUsers')) || [];
+            const staffUser = staffUsers.find(u => 
+                u.username === username && u.password === password
+            );
+            
+            if (staffUser) {
+                sessionStorage.setItem('staffAccountAuth', JSON.stringify(staffUser));
+                currentPage = 'view-accounts';
+                renderApp();
+            } else {
+                alert('Authentication failed. Please verify your staff credentials.');
+            }
+        }
+        
+        // Render account viewing (staff-only access)
+        function renderViewAccounts() {
+            // Check if staff auth is provided
+            const staffAuth = sessionStorage.getItem('staffAccountAuth');
+            if (!staffAuth) {
+                alert('Unauthorized access. Redirecting to authentication.');
+                currentPage = 'staff-account-management';
+                renderApp();
+                return '';
+            }
+            
+            const authStaff = JSON.parse(staffAuth);
+            const patientUsers = JSON.parse(localStorage.getItem('patientUsers')) || [];
+            const staffUsers = JSON.parse(localStorage.getItem('staffUsers')) || [];
+            
+            return `
+                <div class="auth-container" style="max-width: 800px;">
+                    <h1 style="color: #004d00; margin-bottom: 30px;">Account Management</h1>
+                    <p style="color: #666; margin-bottom: 30px; text-align: center;">
+                        Staff access to view registered accounts
+                    </p>
+                    
+                    <div class="account-management">
+                        <h3 style="color: #004d00;">Patient Accounts (${patientUsers.length})</h3>
+                        <div class="user-list">
+                            ${patientUsers.length === 0 ? 
+                                '<p>No patient accounts found.</p>' : 
+                                patientUsers.map(user => `
+                                    <div class="user-item">
+                                        <div class="user-info">
+                                            <h4>${user.username}</h4>
+                                            <p>${user.email}</p>
+                                            <p>Created: ${new Date(user.createdAt).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                `).join('')
+                            }
+                        </div>
+                        
+                        <h3 style="color: #004d00; margin-top: 40px;">Staff Accounts (${staffUsers.length})</h3>
+                        <div class="user-list">
+                            ${staffUsers.length === 0 ? 
+                                '<p>No staff accounts found.</p>' : 
+                                staffUsers.map(user => `
+                                    <div class="user-item">
+                                        <div class="user-info">
+                                            <h4>${user.username} (${user.department})</h4>
+                                            <p>${user.email}</p>
+                                            <p>Staff ID: ${user.staffId} | Created: ${new Date(user.createdAt).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                `).join('')
+                            }
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <p style="margin: 0; color: #666; font-size: 14px;">
+                            Authenticated as: <strong>${authStaff.username}</strong> (${authStaff.department})
+                        </p>
+                    </div>
+                    
+                    <button onclick="sessionStorage.removeItem('staffAccountAuth'); currentPage='login'; renderApp();" class="button" style="margin-top: 30px;">Back to Login</button>
+                </div>
+            `;
+        }
+
+        // Render login page
+        function renderLogin() {
+            return `
+                <div class="auth-container">
+                    <h1 style="color: #004d00; margin-bottom: 30px;">Staff Login</h1>
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="password" required>
+                        </div>
+                        <button type="submit" class="button">Login</button>
+                    </form>
+                    <button type="button" class="button-secondary" onclick="currentPage='signup'; renderApp();">Don't have an account? Sign Up</button>
+                    <button type="button" onclick="currentPage='staff-account-management'; renderApp();" style="
+                        background: #28a745; 
+                        color: white; 
+                        border: none; 
+                        padding: 8px 16px; 
+                        border-radius: 4px; 
+                        cursor: pointer;
+                        margin: 10px 5px;
+                        display: block;
+                        width: 100%;
+                    ">Manage Accounts (Staff Only)</button>
+                    <a href="entry.html" class="back-link">← Back to Main Portal</a>
+                </div>
+            `;
+        }
+        
+        // Render signup page
+        function renderSignup() {
+            return `
+                <div class="auth-container">
+                    <h1 style="color: #004d00; margin-bottom: 30px;">Staff Signup</h1>
+                    <form onsubmit="handleSignup(event)">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Staff ID</label>
+                            <input type="text" id="staffId" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Department</label>
+                            <select id="department" required>
+                                <option value="">Select Department</option>
+                                <option value="Emergency">Emergency</option>
+                                <option value="Internal Medicine">Internal Medicine</option>
+                                <option value="Surgery">Surgery</option>
+                                <option value="Pediatrics">Pediatrics</option>
+                                <option value="Obstetrics & Gynecology">Obstetrics & Gynecology</option>
+                                <option value="Radiology">Radiology</option>
+                                <option value="Laboratory">Laboratory</option>
+                                <option value="Nursing">Nursing</option>
+                                <option value="Administration">Administration</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" id="confirmPassword" required>
+                        </div>
+                        <button type="submit" class="button">Sign Up</button>
+                    </form>
+                    <button type="button" class="button-secondary" onclick="currentPage='login'; renderApp();">Already have an account? Login</button>
+                    <a href="entry.html" class="back-link">← Back to Main Portal</a>
+                </div>
+            `;
+        }
+        
+        // Render dashboard
+        function renderDashboard() {
+            loadVitalsQueue();
+            return `
+                <div class="dashboard-container">
+                    <div class="header">
+                        <div class="logo">KBTH Staff Portal</div>
+                        <div>
+                            <span style="margin-right: 15px;">Welcome, ${currentUser.username}</span>
+                            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                        </div>
+                    </div>
+                    <div class="nav">
+                        <a href="entry.html">Home</a>
+                        <a href="view_triage.html">View Triage Queue</a>
+                        <a href="statistics.html">Summary of Statistics</a>
+                        <a href="patient_status.html">Check Patient Status</a>
+                        <a href="attendance_report.html">Attendance Reports</a>
+                    </div>
+                    <div class="container">
+                        <h1 class="title">Staff Dashboard</h1>
+                        
+                        <div class="grid">
+                            <div class="card">
+                                <h3>Quick Stats</h3>
+                                <p><strong>Department:</strong> ${currentUser.department}</p>
+                                <p><strong>Staff ID:</strong> ${currentUser.staffId}</p>
+                                <p><strong>Total Patients Today:</strong> <span id="patient-count">0</span></p>
+                            </div>
+                            
+                            <div class="card">
+                                <h3>Quick Actions</h3>
+                                <a href="view_triage.html" style="display: block; margin: 10px 0; color: #004d00;">📋 View Triage Queue</a>
+                                <a href="statistics.html" style="display: block; margin: 10px 0; color: #004d00;">📊 View Statistics</a>
+                                <a href="patient_status.html" style="display: block; margin: 10px 0; color: #004d00;">🔍 Check Patient Status</a>
+                                <a href="attendance_report.html" style="display: block; margin: 10px 0; color: #004d00;">📋 Attendance Reports</a>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 40px;">
+                            <h2 style="color: #004d00;">Vitals Queue Management</h2>
+                            <div id="vitals-queue-display">
+                                <p>Loading vitals queue...</p>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 40px;">
+                            <h2 style="color: #004d00;">Add New Patient to Triage</h2>
+                            <form id="triage-form" onsubmit="handleAddPatient(event)">
+                                <div class="form-group">
+                                    <label for="full-name">Full Name *</label>
+                                    <input type="text" id="full-name" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="age">Age *</label>
+                                    <input type="number" id="age" min="0" max="150" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="dob">Date of Birth *</label>
+                                    <input type="date" id="dob" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="symptoms">Symptoms/Reason for Visit *</label>
+                                    <textarea id="symptoms" rows="4" placeholder="Describe the patient's symptoms or reason for visit" required></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="priority">Priority Level</label>
+                                    <select id="priority" required>
+                                        <option value="Low">Low</option>
+                                        <option value="Moderate">Moderate</option>
+                                        <option value="High">High</option>
+                                        <option value="Critical">Critical</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="button">Add Patient to Triage</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Main render function
+        function renderApp() {
+            const app = document.getElementById('app');
+            
+            if (!isAuthenticated) {
+                if (currentPage === 'signup') {
+                    app.innerHTML = renderSignup();
+                } else if (currentPage === 'staff-account-management') {
+                    app.innerHTML = renderStaffAccountManagement();
+                } else if (currentPage === 'view-accounts') {
+                    app.innerHTML = renderViewAccounts();
+                } else {
+                    app.innerHTML = renderLogin();
+                }
+            } else {
+                if (currentPage === 'view-accounts') {
+                    app.innerHTML = renderViewAccounts();
+                } else {
+                    app.innerHTML = renderDashboard();
+                    updatePatientCount();
+                }
+            }
+        }
+        
+        // Update patient count
+        function updatePatientCount() {
+            const patients = JSON.parse(localStorage.getItem('patients')) || [];
+            const today = new Date().toDateString();
+            const todayPatients = patients.filter(p => {
+                const patientDate = new Date(p.addedAt || p.dob).toDateString();
+                return patientDate === today;
+            });
+            
+            document.getElementById('patient-count').textContent = todayPatients.length;
+        }
+        
+        // Load vitals queue
+async function loadVitalsQueue() {
+    try {
+        const response = await callApi(API_ENDPOINTS.AI_TRIAGE.VITALS_QUEUE, 'GET');
+        displayVitalsQueue(response);
+    } catch (error) {
+        console.error('Error loading vitals queue:', error);
+        document.getElementById('vitals-queue-display').innerHTML = 
+            `<p>Error loading vitals queue: ${error.message}</p>`;
+    }
+}
+        
+        // Display vitals queue
+        function displayVitalsQueue(queueData) {
+            if (queueData.length === 0) {
+                document.getElementById('vitals-queue-display').innerHTML = 
+                    '<p>No patients in vitals queue.</p>';
+                return;
+            }
+            
+            let queueHTML = `
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background-color: #f4f4f4;">
+                            <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Patient ID</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Name</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Check-in Time</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Position</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; text-align: left;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            queueData.forEach((patient, index) => {
+                queueHTML += `
+                    <tr>
+                        <td style="border: 1px solid #ccc; padding: 10px;">${patient.patient_id}</td>
+                        <td style="border: 1px solid #ccc; padding: 10px;">${patient.patient_name}</td>
+                        <td style="border: 1px solid #ccc; padding: 10px;">${new Date(patient.check_in_time).toLocaleString()}</td>
+                        <td style="border: 1px solid #ccc; padding: 10px;">${patient.position}</td>
+                        <td style="border: 1px solid #ccc; padding: 10px;">
+                            <button class="button" onclick="enterVitals('${patient.visit_id}')" style="margin-right: 10px;">Enter Vitals</button>
+                            <button class="button" onclick="viewPatient('${patient.patient_id}')">View Patient</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            queueHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('vitals-queue-display').innerHTML = queueHTML;
+        }
+        
+        // Enter vitals for a patient
+        function enterVitals(visitId) {
+            window.location.href = `vitals_entry.html?visitId=${visitId}`;
+        }
+        
+        // View patient details
+        function viewPatient(patientId) {
+            // This would typically open a modal or new page with patient details
+            alert(`Viewing details for patient: ${patientId}`);
+        }
+
+// Initialize app
+checkAuth();
+renderApp();
+    </script>
+</body>
+</html>

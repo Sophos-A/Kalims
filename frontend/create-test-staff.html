@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Test Staff Account - KALIMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #004d00, #006600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #004d00;
+            margin-bottom: 30px;
+        }
+        
+        .button {
+            background-color: #004d00;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        
+        .button:hover {
+            background-color: #003300;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            text-align: left;
+        }
+        
+        .credentials {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #004d00;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create Test Staff Account</h1>
+        <p>Click the button below to create a test staff account for the KALIMS system.</p>
+        <p>This will add a default staff user to your browser's localStorage that you can use to test the staff portal.</p>
+        
+        <button id="createButton" class="button">Create Test Staff Account</button>
+        
+        <div id="result" class="result hidden">
+            <h3>Result:</h3>
+            <p id="resultMessage"></p>
+            
+            <div id="credentials" class="credentials hidden">
+                <h4>Test Staff Credentials:</h4>
+                <p><strong>Username:</strong> <span id="username">teststaff</span></p>
+                <p><strong>Password:</strong> <span id="password">password123</span></p>
+            </div>
+            
+            <p>You can now use these credentials to log in to the <a href="staff.html" target="_blank">Staff Portal</a>.</p>
+        </div>
+        
+        <a href="entry.html" class="back-link">← Back to Main Portal</a>
+    </div>
+    
+    <script>
+        document.getElementById('createButton').addEventListener('click', function() {
+            // Default staff credentials
+            const defaultStaffUser = {
+                username: 'teststaff',
+                email: 'teststaff@example.com',
+                password: 'password123',
+                staffId: 'STAFF001',
+                department: 'Administration',
+                createdAt: new Date().toISOString()
+            };
+            
+            // Get existing staff users or initialize empty array
+            const staffUsers = JSON.parse(localStorage.getItem('staffUsers')) || [];
+            
+            // Check if test user already exists
+            const existingUser = staffUsers.find(user => user.username === defaultStaffUser.username);
+            
+            const resultDiv = document.getElementById('result');
+            const resultMessage = document.getElementById('resultMessage');
+            const credentialsDiv = document.getElementById('credentials');
+            
+            resultDiv.classList.remove('hidden');
+            
+            if (existingUser) {
+                resultMessage.textContent = 'Test staff account already exists! You can use the credentials below to log in.';
+            } else {
+                // Add the default user
+                staffUsers.push(defaultStaffUser);
+                
+                // Save back to localStorage
+                localStorage.setItem('staffUsers', JSON.stringify(staffUsers));
+                
+                resultMessage.textContent = 'Test staff account created successfully! You can use the credentials below to log in.';
+            }
+            
+            credentialsDiv.classList.remove('hidden');
+            document.getElementById('username').textContent = defaultStaffUser.username;
+            document.getElementById('password').textContent = defaultStaffUser.password;
+        });
+    </script>
+</body>
+</html>

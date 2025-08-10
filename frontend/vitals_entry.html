@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitals Data Entry - KBTH</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="api-config.js"></script>
+    <style>
+        .vitals-form-container {
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .queue-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 5px solid var(--primary);
+        }
+
+        .back-container {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="korle-bu-686x700-removebg-preview.png" alt="KBTH Logo" class="hospital-logo">
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="vitals-form-container">
+            <h2 class="form-title">Vitals Data Entry</h2>
+            
+            <div class="queue-info">
+                <h3>Patient Information</h3>
+                <div id="patientInfo">
+                    <p>Loading patient information...</p>
+                </div>
+            </div>
+            
+            <form id="vitalsForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="heartRate">Heart Rate (bpm) *</label>
+                        <input type="number" id="heartRate" class="form-control" required min="0">
+                        <div class="error-message" id="heartRateError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="respiratoryRate">Respiratory Rate (breaths/min) *</label>
+                        <input type="number" id="respiratoryRate" class="form-control" required min="0">
+                        <div class="error-message" id="respiratoryRateError"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="bloodPressure">Blood Pressure (mmHg) * (Format: SYS/DIA)</label>
+                    <input type="text" id="bloodPressure" class="form-control" placeholder="e.g., 120/80" required>
+                    <div class="error-message" id="bloodPressureError"></div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="oxygenSaturation">Oxygen Saturation (SpO₂ %) *</label>
+                        <input type="number" id="oxygenSaturation" class="form-control" required min="0" max="100">
+                        <div class="error-message" id="oxygenSaturationError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="weight">Weight (kg) *</label>
+                        <input type="number" id="weight" class="form-control" step="0.1" required min="0">
+                        <div class="error-message" id="weightError"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes / Observations</label>
+                    <textarea id="notes" class="form-control" placeholder="Any additional observations or notes..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit" id="submitBtn">Submit Vitals Data</button>
+            </form>
+            
+            <div class="success-message" id="successMessage">
+                Vitals data submitted successfully! Patient has been moved to the doctor's queue with a triage score of <span id="triageScore">0.0</span>.
+            </div>
+            
+            <div class="back-container">
+                <a href="staff.html" class="back-button">← Back to Staff Dashboard</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Get visit ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const visitId = urlParams.get('visitId');
+        
+        if (!visitId) {
+            alert('No visit ID provided. Redirecting to staff dashboard.');
+            window.location.href = 'staff.html';
+        }
+        
+        // Load patient information
+        async function loadPatientInfo() {
+            try {
+                const response = await callApi(`${API_ENDPOINTS.PATIENTS.VISIT}/${visitId}`, 'GET');
+                
+                const data = response;
+                const patient = data.patient;
+                const visit = data.visit;
+                
+                document.getElementById('patientInfo').innerHTML = `
+                    <p><strong>Patient ID:</strong> ${patient.id}</p>
+                    <p><strong>Name:</strong> ${patient.name}</p>
+                    <p><strong>Visit ID:</strong> ${visit.id}</p>
+                    <p><strong>Check-in Time:</strong> ${new Date(visit.checkInTime).toLocaleString()}</p>
+                `;
+            } catch (error) {
+                console.error('Error loading patient info:', error);
+                document.getElementById('patientInfo').innerHTML = `<p>Error loading patient information: ${error.message}</p>`;
+            }
+        }
+        
+        // Validate blood pressure format
+        function validateBloodPressure(bp) {
+            const bpRegex = /^\d{2,3}\/\d{2,3}$/;
+            return bpRegex.test(bp);
+        }
+        
+        // Validate form inputs
+        function validateForm() {
+            let isValid = true;
+            
+            // Reset error messages
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+            
+            // Validate heart rate
+            const heartRate = document.getElementById('heartRate').value;
+            if (!heartRate || heartRate < 0) {
+                document.getElementById('heartRateError').textContent = 'Please enter a valid heart rate.';
+                document.getElementById('heartRateError').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate respiratory rate
+            const respiratoryRate = document.getElementById('respiratoryRate').value;
+            if (!respiratoryRate || respiratoryRate < 0) {
+                document.getElementById('respiratoryRateError').textContent = 'Please enter a valid respiratory rate.';
+                document.getElementById('respiratoryRateError').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate blood pressure
+            const bloodPressure = document.getElementById('bloodPressure').value;
+            if (!bloodPressure) {
+                document.getElementById('bloodPressureError').textContent = 'Please enter blood pressure.';
+                document.getElementById('bloodPressureError').style.display = 'block';
+                isValid = false;
+            } else if (!validateBloodPressure(bloodPressure)) {
+                document.getElementById('bloodPressureError').textContent = 'Please enter blood pressure in SYS/DIA format (e.g., 120/80).';
+                document.getElementById('bloodPressureError').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate oxygen saturation
+            const oxygenSaturation = document.getElementById('oxygenSaturation').value;
+            if (!oxygenSaturation || oxygenSaturation < 0 || oxygenSaturation > 100) {
+                document.getElementById('oxygenSaturationError').textContent = 'Please enter a valid oxygen saturation (0-100%).';
+                document.getElementById('oxygenSaturationError').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate weight
+            const weight = document.getElementById('weight').value;
+            if (!weight || weight < 0) {
+                document.getElementById('weightError').textContent = 'Please enter a valid weight.';
+                document.getElementById('weightError').style.display = 'block';
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // Submit vitals data
+        async function submitVitalsData(event) {
+            event.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+            
+            // Disable submit button during processing
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            
+            try {
+                // Get form data
+                const vitalsData = {
+                    heartRate: parseInt(document.getElementById('heartRate').value),
+                    respiratoryRate: parseInt(document.getElementById('respiratoryRate').value),
+                    bloodPressure: document.getElementById('bloodPressure').value,
+                    oxygenSaturation: parseInt(document.getElementById('oxygenSaturation').value),
+                    weight: parseFloat(document.getElementById('weight').value)
+                };
+                
+                const notes = document.getElementById('notes').value;
+                
+                // Get patient ID from the patient info section
+                const patientId = document.querySelector('#patientInfo p:first-child').textContent.split(':')[1].trim();
+                
+                // Submit to AI triage engine
+                const response = await callApi(API_ENDPOINTS.AI_TRIAGE.PROCESS, 'POST', {
+                    patientId: patientId,
+                    vitals: vitalsData,
+                    notes: notes
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to process vitals data');
+                }
+                
+                const result = await response.json();
+                
+                // Show success message
+                document.getElementById('triageScore').textContent = result.triageScore.toFixed(2);
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Reset form
+                document.getElementById('vitalsForm').reset();
+                
+                // Redirect to staff dashboard after 3 seconds
+                setTimeout(() => {
+                    window.location.href = 'staff.html';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error submitting vitals data:', error);
+                alert(`Error submitting vitals data: ${error.message}`);
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Vitals Data';
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPatientInfo();
+            document.getElementById('vitalsForm').addEventListener('submit', submitVitalsData);
+        });
+    </script>
+</body>
+</html>
